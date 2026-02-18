@@ -51,7 +51,7 @@
 <body>
     <h1>Check Weather</h1>
 
-    <form action="/dashboard" method="GET">
+    <form action="/dashboard" method="get">
         <div class="input-group">
             <label for="city">City Name:</label>
             <input type="text" id="city" name="city" placeholder="e.g. London" required>
@@ -64,6 +64,10 @@
 
         <button type="submit" id="getWeatherBtn">Get Weather</button>
     </form>
+
+    <div id="result"></div>
+
+    <script src="/static/js/main.js"></script>
 </body>
 
 </html>

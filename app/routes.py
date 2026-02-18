@@ -13,26 +13,41 @@ def home():
 def dashboard():
     city = request.args.get('city')
     country = request.args.get('country')
+    lat = request.args.get('lat')
+    lon = request.args.get('lon')
     api_key = os.getenv("OPENWEATHER_API_KEY")
 
-    if not city or not api_key:
+    if (not city and not (lat and lon)) or not api_key:
         return render_template('dashboard.html', weather=None)
 
-    # 1. Geocoding
-    geo_url = "http://api.openweathermap.org/geo/1.0/direct"
-    q_param = f"{city},{country}" if country else city
-    geo_params = {'q': q_param, 'limit': 1, 'appid': api_key}
-
+    # 1. Geocoding / Location Logic
+    location_name = "Your Location"
+    
     try:
-        geo_resp = requests.get(geo_url, params=geo_params)
-        if geo_resp.status_code != 200 or not geo_resp.json():
-            return render_template('dashboard.html', weather=None, error="City not found")
-        
-        geo_data = geo_resp.json()[0]
-        lat, lon = geo_data['lat'], geo_data['lon']
-        location_name = geo_data['name']
-        if 'country' in geo_data:
-            location_name += f", {geo_data['country']}"
+        if city:
+            geo_url = "http://api.openweathermap.org/geo/1.0/direct"
+            q_param = f"{city},{country}" if country else city
+            geo_params = {'q': q_param, 'limit': 1, 'appid': api_key}
+            
+            geo_resp = requests.get(geo_url, params=geo_params)
+            if geo_resp.status_code != 200 or not geo_resp.json():
+                return render_template('dashboard.html', weather=None, error="City not found")
+            
+            geo_data = geo_resp.json()[0]
+            lat, lon = geo_data['lat'], geo_data['lon']
+            location_name = geo_data['name']
+            if 'country' in geo_data:
+                location_name += f", {geo_data['country']}"
+        else:
+             # Reverse geocoding to get name from coords
+             rev_geo_url = "http://api.openweathermap.org/geo/1.0/reverse"
+             rev_params = {'lat': lat, 'lon': lon, 'limit': 1, 'appid': api_key}
+             rev_resp = requests.get(rev_geo_url, params=rev_params)
+             if rev_resp.status_code == 200 and rev_resp.json():
+                 rev_data = rev_resp.json()[0]
+                 location_name = rev_data['name']
+                 if 'country' in rev_data:
+                     location_name += f", {rev_data['country']}"
 
         # 2. Weather Data
         weather_url = "https://api.openweathermap.org/data/2.5/weather"

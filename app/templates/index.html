@@ -63,9 +63,48 @@
         </div>
 
         <button type="submit" id="getWeatherBtn">Get Weather</button>
+        <button type="button" id="geoBtn" onclick="getLocation()"
+            style="margin-left: 10px; background-color: #2c2f48; color: white;">Use Current Location</button>
     </form>
 
     <div id="result"></div>
+    <div id="geo-status" style="margin-top: 10px; color: #666;"></div>
+
+    <script>
+        function getLocation() {
+            const statusDiv = document.getElementById('geo-status');
+            if (navigator.geolocation) {
+                statusDiv.textContent = "Locating...";
+                navigator.geolocation.getCurrentPosition(showPosition, showError);
+            } else {
+                statusDiv.textContent = "Geolocation is not supported by this browser.";
+            }
+        }
+
+        function showPosition(position) {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+            window.location.href = `/dashboard?lat=${lat}&lon=${lon}`;
+        }
+
+        function showError(error) {
+            const statusDiv = document.getElementById('geo-status');
+            switch (error.code) {
+                case error.PERMISSION_DENIED:
+                    statusDiv.textContent = "User denied the request for Geolocation.";
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    statusDiv.textContent = "Location information is unavailable.";
+                    break;
+                case error.TIMEOUT:
+                    statusDiv.textContent = "The request to get user location timed out.";
+                    break;
+                case error.UNKNOWN_ERROR:
+                    statusDiv.textContent = "An unknown error occurred.";
+                    break;
+            }
+        }
+    </script>
 
     <script src="/static/js/main.js"></script>
 </body>

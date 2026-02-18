@@ -50,17 +50,15 @@
           </div>
           {% elif weather %}
           <div class="card bg-dark text-white border-0 shadow-lg"
-            style="background-color: #2c2f48 !important; border-radius: 1rem;">
+            style="background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7)), url('{{ weather.image_url }}'); background-size: cover; background-position: center; border-radius: 1rem;">
             <div class="card-body p-4">
               <!-- Header: Title and Time -->
               <div class="d-flex justify-content-between align-items-start mb-4">
                 <div>
+                  <h5 class="text-white mb-2 font-weight-bold">{{ weather.name }}</h5>
                   <h6 class="text-uppercase text-light mb-0" style="letter-spacing: 1px; font-weight: 600;">Current
                     weather</h6>
                   <p class="text-white mb-0" style="font-size: 1.1rem;" id="local-time"></p>
-                </div>
-                <div class="text-end">
-                  <h5 class="text-white mb-0">{{ weather.name }}</h5>
                 </div>
               </div>
 

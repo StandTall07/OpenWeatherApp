@@ -60,6 +60,34 @@ def dashboard():
         elif icon_code in ['13d', '13n']: icon_class = 'fas fa-snowflake text-info'
         elif icon_code in ['50d', '50n']: icon_class = 'fas fa-smog text-secondary'
 
+        # 3. Unsplash Image
+        unsplash_access_key = os.getenv("UNSPLASH_ACCESS_KEY")
+        image_url = None
+        if unsplash_access_key:
+            unsplash_url = "https://api.unsplash.com/search/photos"
+            # Search query: "City weather description" e.g. "London scattered clouds"
+            query = f"{location_name} {d['weather'][0]['description']}"
+            unsplash_params = {
+                'query': query,
+                'page': 1,
+                'per_page': 1,
+                'orientation': 'landscape',
+                'client_id': unsplash_access_key
+            }
+            try:
+                unsplash_resp = requests.get(unsplash_url, params=unsplash_params)
+                if unsplash_resp.status_code == 200:
+                    unsplash_data = unsplash_resp.json()
+                    if unsplash_data['results']:
+                        image_url = unsplash_data['results'][0]['urls']['regular']
+            except Exception:
+                # Fallback or log error, but don't crash dashboard
+                pass
+        
+        # Fallback image if Unsplash fails or no key
+        if not image_url:
+             image_url = "https://images.unsplash.com/photo-1516912481808-3406841bd33c?q=80&w=2544&auto=format&fit=crop" # Generic weather/sky image
+
         weather_data = {
             'name': location_name,
             'temp': round(temp),
@@ -72,7 +100,8 @@ def dashboard():
             'visibility': round(d.get('visibility', 0) / 1000), # meters to km
             'pressure': d['main']['pressure'],
             'dew_point': round(dew_point),
-            'icon_class': icon_class
+            'icon_class': icon_class,
+            'image_url': image_url
         }
         
         return render_template('dashboard.html', weather=weather_data)
